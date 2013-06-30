@@ -1,8 +1,7 @@
 #include "datastr.h"
 
 QString types =
-        "int,double,string,intlist,doublelist,stringlist,complex,complexlist"+
-        ",boolean,booleanlist,timestamp,timestamplist,table";
+"int,double,string,intlist,doublelist,stringlist,complex,complexlist,boolean,booleanlist,timestamp,timestamplist,table";
 QStringList Element::typelist=types.split(",");
 
 bool Element::load(QXmlStreamReader &reader)
@@ -20,8 +19,9 @@ bool Element::load(QXmlStreamReader &reader)
                     break;
                 }
                 flag1 = true;
-                Name = reader.readElementText();
+                Name = reader.readElementText().trimmed();
                 name = Name.toLower();
+                Name = Name.left(1).toUpper()+Name.right(Name.length()-1);
                 reader.readNext();
             }
             else if(reader.name() == "Type") {
@@ -31,7 +31,7 @@ bool Element::load(QXmlStreamReader &reader)
                     flag2=false;
                     break;
                 }
-                QString tmp = reader.readElementText();
+                QString tmp = reader.readElementText().trimmed();
                 for(type=0;type<typelist.length();type++) {
                     if (tmp==typelist[type])
                         break;
@@ -47,7 +47,7 @@ bool Element::load(QXmlStreamReader &reader)
                     break;
                 if(!flag2)
                     break;
-                QString tmp = reader.readElementText();
+                QString tmp = reader.readElementText().trimmed();
                 if(typelist[type].right(4)=="list")
                     name = tmp;
                 else
@@ -93,8 +93,9 @@ bool Group::load(QXmlStreamReader &reader)
             if(reader.name() == "Name") {
                 if(flag1) {flag1=false; break;}
                 flag1 = true;
-                name = reader.readElementText().toLower();
-                Name = name.left(1).toUpper()+name.right(name.length()-1);
+                Name = reader.readElementText().trimmed();
+                name = Name.toLower();
+                Name = Name.left(1).toUpper()+Name.right(Name.length()-1);
                 reader.readNext();
             }
             else if(reader.name() == "Element") {

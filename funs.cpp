@@ -124,29 +124,32 @@ void wrt_h_D(Element &e, QTextStream &writer)
     if(t<0 || t>7) return;
     writer<<tab;
     switch (t) {
-    case 0:
+    case 0: // int
         writer<<"int ";
         break;
-    case 1:
+    case 1: // double
         writer<<"double ";
         break;
-    case 2:
+    case 2: // string
         writer<<"QString ";
         break;
-    case 3:
+    case 3: // intlist
         writer<<"QList<int> ";
         break;
-    case 4:
+    case 4: // doublelist
         writer<<"QList<double> ";
         break;
-    case 5:
+    case 5: // stringlist
         writer<<"QStringList ";
         break;
-    case 6:
+    case 6: // complex
         writer<<e.getName()<<" ";
         break;
-    case 7:
+    case 7: // complexlist
         writer<<"QList<"<<e.getName()<<" *> ";
+        break;
+    case 8: // boolean
+        writer<<"bool ";
         break;
     default:
         break;
@@ -160,19 +163,19 @@ void wrt_h_R(Element &e, QTextStream &writer)
     if(t<0 || t>7) return;
     writer<<tab;
     switch (t) {
-    case 0:
+    case 0: // int
         writer<<"int "<<e.getName()<<"() const "
               <<"{return "<<e.getname()<<";}";
         break;
-    case 1:
+    case 1: // double
         writer<<"double "<<e.getName()<<"() const "
               <<"{return "<<e.getname()<<";}";
         break;
-    case 2:
+    case 2: // string
         writer<<"QString "<<e.getName()<<"() const "
               <<"{return "<<e.getname()<<";}";
         break;
-    case 3:
+    case 3: // intlist
         writer<<"int "<<e.getname()<<"Length() const "
               <<"{return "<<e.getname()<<".length();}"<<endline;
         writer<<tab;
@@ -180,7 +183,7 @@ void wrt_h_R(Element &e, QTextStream &writer)
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
               <<e.getname()<<"[i]; else return 0;}";
         break;
-    case 4:
+    case 4: // doublelist
         writer<<"int "<<e.getname()<<"Length() const "
               <<"{return "<<e.getname()<<".length();}"<<endline;
         writer<<tab;
@@ -188,7 +191,7 @@ void wrt_h_R(Element &e, QTextStream &writer)
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
               <<e.getname()<<"[i]; else return 0;}";
         break;
-    case 5:
+    case 5: // stringlist
         writer<<"int "<<e.getname()<<"Length() const "
               <<"{return "<<e.getname()<<".length();}"<<endline;
         writer<<tab;
@@ -196,11 +199,11 @@ void wrt_h_R(Element &e, QTextStream &writer)
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
               <<e.getname()<<"[i]; else return \"\";}";
         break;
-    case 6:
+    case 6: // complex
         writer<<e.getName()<<"* "<<e.getName()<<"_data() "
               <<"{return &"<<e.getname()<<";}";
         break;
-    case 7:
+    case 7: // complexlist
         writer<<"int "<<e.getname()<<"Length() const "
               <<"{return "<<e.getname()<<".length();}"<<endline;
         writer<<tab;
@@ -208,6 +211,10 @@ void wrt_h_R(Element &e, QTextStream &writer)
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
               <<e.getname()<<"[i]; else return 0;}";
         break;
+    case 8: // boolean
+        writer<<"bool "<<e.getName()<<"() const "
+             <<"{return "<<e.getname()<<";}";
+       break;
     default:
         break;
     }
@@ -220,19 +227,19 @@ void wrt_h_W(Element &e, QTextStream &writer)
     if(t<0 || t>7 || t==6) return;
     writer<<tab;
     switch (t) {
-    case 0:
+    case 0: // int
         writer<<"void set"<<e.getName()<<"(int _n) "
               <<"{"<<e.getname()<<"=_n;}";
         break;
-    case 1:
+    case 1: // double
         writer<<"void set"<<e.getName()<<"(double _n) "
               <<"{"<<e.getname()<<"=_n;}";
         break;
-    case 2:
+    case 2: // string
         writer<<"void set"<<e.getName()<<"(const QString &_n) "
               <<"{"<<e.getname()<<"=_n;}";
         break;
-    case 3:
+    case 3: // intlist
         writer<<"bool del"<<e.getName()<<"(int i) "
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
               <<e.getname()<<".removeAt(i);return true;} "
@@ -244,7 +251,7 @@ void wrt_h_W(Element &e, QTextStream &writer)
         writer<<tab<<"void add"<<e.getName()<<"(int _n) "
               <<"{"<<e.getname()<<".append(_n);}";
         break;
-    case 4:
+    case 4: // doublelist
         writer<<"bool del"<<e.getName()<<"(int i) "
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
               <<e.getname()<<".removeAt(i);return true;} "
@@ -256,7 +263,7 @@ void wrt_h_W(Element &e, QTextStream &writer)
         writer<<tab<<"void add"<<e.getName()<<"(double _n) "
               <<"{"<<e.getname()<<".append(_n);}";
         break;
-    case 5:
+    case 5: // stringlist
         writer<<"bool del"<<e.getName()<<"(int i) "
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
               <<e.getname()<<".removeAt(i);return true;} "
@@ -268,13 +275,17 @@ void wrt_h_W(Element &e, QTextStream &writer)
         writer<<tab<<"void add"<<e.getName()<<"(const QString &_n) "
               <<"{"<<e.getname()<<".append(_n);}";
         break;
-    case 7:
+    case 7: // complexlist
         writer<<"bool del"<<e.getName()<<"(int i) "
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
               <<"delete "<<e.getname()<<"[i];"<<e.getname()<<".removeAt(i);return true;} "
               <<"else return false;}"<<endline;
         writer<<tab<<"void add"<<e.getName()<<"("<<e.getName()<<" *_n) "
               <<"{"<<e.getname()<<".append(_n);}";
+        break;
+    case 8: // boolean
+        writer<<"void set"<<e.getName()<<"(bool _n) "
+              <<"{"<<e.getname()<<"=_n;}";
         break;
     default:
         break;
@@ -296,24 +307,27 @@ void wrt_cpp(Group &p, QTextStream &writer)
     for(int i=0;i<p.elementLength();i++) {
         Element *e = p.elementAt(i);
         switch(e->gettype()) {
-        case 0:
-        case 1:
+        case 0: // int
+        case 1: // double
             writer<<tab<<e->getname()<<"=0;"<<endline;
             break;
-        case 2:
+        case 2: // string
             writer<<tab<<e->getname()<<"=\"\";"<<endline;
             break;
-        case 3:
-        case 4:
-        case 5:
+        case 3: // intlist
+        case 4: // doublelist
+        case 5: // stringlist
             writer<<tab<<e->getname()<<".clear();"<<endline;
             break;
-        case 7:
+        case 7: // complex
             writer<<tab;
             writer<<"for(int i=0;i<"<<e->getname()<<".length();i++) "
                   <<"delete "<<e->getname()<<"[i];";
             writer<<endline;
             writer<<tab<<e->getname()<<".clear();"<<endline;
+            break;
+        case 8: // boolean
+            writer<<tab<<e->getname()<<"=false;"<<endline;
             break;
         default:
             break;
@@ -381,31 +395,31 @@ void wrt_cpp_L(Element &e, int i, QTextStream &writer)
     QString flag = "flag"+QString::number(i);
     int t = e.gettype();
     switch (t) {
-    case 0:
+    case 0: // int
         writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
         writer<<tab4<<flag<<"=true;"<<endline;
-        writer<<tab4<<e.getname()<<"=reader.readElementText().toInt();"<<endline;
+        writer<<tab4<<e.getname()<<"=reader.readElementText().trimmed().toInt();"<<endline;
         break;
-    case 1:
+    case 1: // double
         writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
         writer<<tab4<<flag<<"=true;"<<endline;
-        writer<<tab4<<e.getname()<<"=reader.readElementText().toDouble();"<<endline;
+        writer<<tab4<<e.getname()<<"=reader.readElementText().trimmed().toDouble();"<<endline;
         break;
-    case 2:
+    case 2: // string
         writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
         writer<<tab4<<flag<<"=true;"<<endline;
-        writer<<tab4<<e.getname()<<"=reader.readElementText();"<<endline;
+        writer<<tab4<<e.getname()<<"=reader.readElementText().trimmed();"<<endline;
         break;
-    case 3:
-        writer<<tab4<<e.getname()<<".append(reader.readElementText().toInt());"<<endline;
+    case 3: // intlist
+        writer<<tab4<<e.getname()<<".append(reader.readElementText().trimmed().toInt());"<<endline;
         break;
-    case 4:
-        writer<<tab4<<e.getname()<<".append(reader.readElementText().toDouble());"<<endline;
+    case 4: // doublelist
+        writer<<tab4<<e.getname()<<".append(reader.readElementText().trimmed().toDouble());"<<endline;
         break;
-    case 5:
-        writer<<tab4<<e.getname()<<".append(reader.readElementText());"<<endline;
+    case 5: // stringlist
+        writer<<tab4<<e.getname()<<".append(reader.readElementText().trimmed());"<<endline;
         break;
-    case 6:
+    case 6: // complex
         writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
         writer<<tab4<<flag<<"=true;"<<endline;
         writer<<tab4<<"if(!"<<e.getname()<<".load(reader)) {"<<endline;
@@ -413,7 +427,7 @@ void wrt_cpp_L(Element &e, int i, QTextStream &writer)
         writer<<tab4<<tab<<"return false;"<<endline;
         writer<<tab4<<"}"<<endline;
         break;
-    case 7:
+    case 7: // complexlist
         writer<<tab4<<e.getName()<<" *p=new "<<e.getName()<<"();"<<endline;
         writer<<tab4<<"if(p->load(reader))"<<endline;
         writer<<tab4<<tab<<e.getname()<<".append(p);"<<endline;
@@ -422,6 +436,12 @@ void wrt_cpp_L(Element &e, int i, QTextStream &writer)
         writer<<tab4<<tab<<"cleanAll();"<<endline;
         writer<<tab4<<tab<<"return false;"<<endline;
         writer<<tab4<<"}"<<endline;
+        break;
+    case 8: // boolean
+        writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
+        writer<<tab4<<flag<<"=true;"<<endline;
+        writer<<tab4<<"QString tmp=reader.readElementText().trimmed();"<<endline;
+        writer<<tab4<<e.getname()<<"=((tmp==\"true\") || (tmp==\"True\") || (tmp==\"T\") || (tmp==\"1\"));"<<endline;
         break;
     default:
         break;
@@ -432,32 +452,36 @@ void wrt_cpp_S(Element &e, QTextStream &writer)
 {
     int t=e.gettype();
     switch(t) {
-    case 0:
-    case 1:
+    case 0: // int
+    case 1: // double
         writer<<tab<<"writer.writeTextElement(\""<<e.getName()
               <<"\", QString::number("<<e.getname()<<"));"<<endline;
         break;
-    case 2:
+    case 2: // string
         writer<<tab<<"writer.writeTextElement(\""<<e.getName()
               <<"\", "<<e.getname()<<");"<<endline;
         break;
-    case 3:
-    case 4:
+    case 3: // intlist
+    case 4: // doublelist
         writer<<tab<<"for(int i=0;i<"<<e.getname()<<".length();i++)"<<endline;
         writer<<tab<<tab<<"writer.writeTextElement(\""<<e.getName()
               <<"\", QString::number("<<e.getname()<<"[i]));"<<endline;
         break;
-    case 5:
+    case 5: //stringlist
         writer<<tab<<"for(int i=0;i<"<<e.getname()<<".length();i++)"<<endline;
         writer<<tab<<tab<<"writer.writeTextElement(\""<<e.getName()
               <<"\", "<<e.getname()<<"[i]);"<<endline;
         break;
-    case 6:
+    case 6: // complex
         writer<<tab<<e.getname()<<".save(writer);"<<endline;
         break;
-    case 7:
+    case 7: // complexlist
         writer<<tab<<"for(int i=0;i<"<<e.getname()<<".length();i++)"<<endline;
         writer<<tab<<tab<<e.getname()<<"[i]->save(writer);"<<endline;
+        break;
+    case 8: //boolean
+        writer<<tab<<"writer.writeTextElement(\""<<e.getName()
+              <<"\", "<<e.getname()<<"?\"True\":\"False\");"<<endline;
         break;
     default:
         break;
