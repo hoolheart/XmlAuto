@@ -4,6 +4,7 @@
 QString endline = "\n";
 QString tab="    ";
 QString tab4 = tab+tab+tab+tab;
+QString timeFormat = "\"yyyy.MM.dd hh:mm:ss.zzz\"";
 
 bool readFile(DataStr &dat, const QString &filename, FileCode &err)
 {
@@ -66,6 +67,8 @@ bool transform(DataStr &dat, const QString &filename, FileCode &err)
     writer_h<<"#ifndef "+name.toUpper()+"_H"<<endline
             <<"#define "+name.toUpper()+"_H"<<endline
             <<"#include <QStringList>"<<endline
+            <<"#include <QDateTime>"<<endline
+            <<"#include \"ZtTable.h\""<<endline
             <<"#include <QXmlStreamReader>"<<endline
             <<"#include <QXmlStreamWriter>"<<endline<<endline;
     writer_cpp<<"#include \""<<name<<".h\""<<endline;
@@ -121,7 +124,7 @@ void transformGroup(Group &p, QTextStream &writer_h, QTextStream &writer_cpp)
 void wrt_h_D(Element &e, QTextStream &writer)
 {
     int t = e.gettype();
-    if(t<0 || t>7) return;
+//    if(t<0 || t>7) return;
     writer<<tab;
     switch (t) {
     case 0: // int
@@ -151,6 +154,18 @@ void wrt_h_D(Element &e, QTextStream &writer)
     case 8: // boolean
         writer<<"bool ";
         break;
+    case 9: // booleanlist
+        writer<<"QList<bool> ";
+        break;
+    case 10: // timestamp
+        writer<<"QDateTime ";
+        break;
+    case 11: // timestamplist
+        writer<<"QList<QDateTime> ";
+        break;
+    case 12: // table
+        writer<<"ZtTable ";
+        break;
     default:
         break;
     }
@@ -160,7 +175,7 @@ void wrt_h_D(Element &e, QTextStream &writer)
 void wrt_h_R(Element &e, QTextStream &writer)
 {
     int t = e.gettype();
-    if(t<0 || t>7) return;
+//    if(t<0 || t>7) return;
     writer<<tab;
     switch (t) {
     case 0: // int
@@ -215,6 +230,30 @@ void wrt_h_R(Element &e, QTextStream &writer)
         writer<<"bool "<<e.getName()<<"() const "
              <<"{return "<<e.getname()<<";}";
        break;
+    case 9: // booleanlist
+        writer<<"int "<<e.getname()<<"Length() const "
+              <<"{return "<<e.getname()<<".length();}"<<endline;
+        writer<<tab;
+        writer<<"bool "<<e.getname()<<"At(int i) const "
+              <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
+              <<e.getname()<<"[i]; else return 0;}";
+        break;
+    case 10: // timestamp
+        writer<<"QDateTime "<<e.getName()<<"() const "
+              <<"{return "<<e.getname()<<";}";
+        break;
+    case 11: // timestamplist
+        writer<<"int "<<e.getname()<<"Length() const "
+              <<"{return "<<e.getname()<<".length();}";
+        writer<<tab;
+        writer<<"QDateTime "<<e.getname()<<"At(int i) const "
+              <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
+              <<e.getname()<<"[i]; else return 0;}";
+        break;
+    case 12: // table
+        writer<<"ZtTable* "<<e.getName()<<"() "
+              <<"{return &"<<e.getname()<<";}";
+        break;
     default:
         break;
     }
@@ -224,7 +263,8 @@ void wrt_h_R(Element &e, QTextStream &writer)
 void wrt_h_W(Element &e, QTextStream &writer)
 {
     int t = e.gettype();
-    if(t<0 || t>7 || t==6) return;
+//    if(t<0 || t>7 || t==6) return;
+    if(t==6 || t==12) return;
     writer<<tab;
     switch (t) {
     case 0: // int
@@ -287,6 +327,34 @@ void wrt_h_W(Element &e, QTextStream &writer)
         writer<<"void set"<<e.getName()<<"(bool _n) "
               <<"{"<<e.getname()<<"=_n;}";
         break;
+    case 9: // booleanlist
+        writer<<"bool del"<<e.getName()<<"(int i) "
+              <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
+              <<e.getname()<<".removeAt(i);return true;} "
+              <<"else return false;}"<<endline;
+        writer<<tab<<"bool change"<<e.getName()<<"(int i, bool _n) "
+              <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
+              <<e.getname()<<"[i]=_n;return true;} "
+              <<"else return false;}"<<endline;
+        writer<<tab<<"void add"<<e.getName()<<"(bool _n) "
+              <<"{"<<e.getname()<<".append(_n);}";
+        break;
+    case 10: // timestamp
+        writer<<"void set"<<e.getName()<<"(const QDateTime &_n) "
+              <<"{"<<e.getname()<<"=_n;}";
+        break;
+    case 11: // timestamplist
+        writer<<"bool del"<<e.getName()<<"(int i) "
+              <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
+              <<e.getname()<<".removeAt(i);return true;} "
+              <<"else return false;}"<<endline;
+        writer<<tab<<"bool change"<<e.getName()<<"(int i, const QDateTime &_n) "
+              <<"{if(i>=0 && i<"<<e.getname()<<".length()) {"
+              <<e.getname()<<"[i]=_n;return true;} "
+              <<"else return false;}"<<endline;
+        writer<<tab<<"void add"<<e.getName()<<"(const QDateTime &_n) "
+              <<"{"<<e.getname()<<".append(_n);}";
+        break;
     default:
         break;
     }
@@ -317,9 +385,15 @@ void wrt_cpp(Group &p, QTextStream &writer)
         case 3: // intlist
         case 4: // doublelist
         case 5: // stringlist
+        case 9: // booleanlist
+        case 11: // timestamplist
             writer<<tab<<e->getname()<<".clear();"<<endline;
             break;
-        case 7: // complex
+        case 6: // complex
+        case 12: // table
+            writer<<tab<<e->getname()<<".clearAll();"<<endline;
+            break;
+        case 7: // complexlist
             writer<<tab;
             writer<<"for(int i=0;i<"<<e->getname()<<".length();i++) "
                   <<"delete "<<e->getname()<<"[i];";
@@ -420,6 +494,7 @@ void wrt_cpp_L(Element &e, int i, QTextStream &writer)
         writer<<tab4<<e.getname()<<".append(reader.readElementText().trimmed());"<<endline;
         break;
     case 6: // complex
+    case 12: // table
         writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
         writer<<tab4<<flag<<"=true;"<<endline;
         writer<<tab4<<"if(!"<<e.getname()<<".load(reader)) {"<<endline;
@@ -442,6 +517,20 @@ void wrt_cpp_L(Element &e, int i, QTextStream &writer)
         writer<<tab4<<flag<<"=true;"<<endline;
         writer<<tab4<<"QString tmp=reader.readElementText().trimmed();"<<endline;
         writer<<tab4<<e.getname()<<"=((tmp==\"true\") || (tmp==\"True\") || (tmp==\"T\") || (tmp==\"1\"));"<<endline;
+        break;
+    case 9: //booleanlist
+        writer<<tab4<<"QString tmp=reader.readElementText().trimmed();"<<endline;
+        writer<<tab4<<"bool tmpBool=((tmp==\"true\") || (tmp==\"True\") || (tmp==\"T\") || (tmp==\"1\"));"<<endline;
+        writer<<tab4<<e.getname()<<".append(tmpBool);"<<endline;
+        break;
+    case 10: // timestamp
+        writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
+        writer<<tab4<<flag<<"=true;"<<endline;
+        writer<<tab4<<e.getname()<<"=QDateTime::fromString(reader.readElementText().trimmed(),"<<timeFormat<<");"<<endline;
+        break;
+    case 11: // timestamplist
+        writer<<tab4<<e.getname()<<".append(QDateTime::fromString(reader.readElementText().trimmed(),"
+             <<timeFormat<<"));"<<endline;
         break;
     default:
         break;
@@ -482,6 +571,25 @@ void wrt_cpp_S(Element &e, QTextStream &writer)
     case 8: //boolean
         writer<<tab<<"writer.writeTextElement(\""<<e.getName()
               <<"\", "<<e.getname()<<"?\"True\":\"False\");"<<endline;
+        break;
+    case 9: // booleanlist
+        writer<<tab<<"for(int i=0;i<"<<e.getname()<<".length();i++)"<<endline;
+        writer<<tab<<tab<<"writer.writeTextElement(\""<<e.getName()
+              <<"\", "<<e.getname()<<"[i]?\"True\":\"False\");"<<endline;
+        break;
+    case 10: // timestamp
+        writer<<tab<<"writer.writeTextElement(\""<<e.getName()
+             <<"\", "<<e.getname()<<".toString("<<timeFormat<<"));"<<endline;
+        break;
+    case 11: //timestamplist
+        writer<<tab<<"for(int i=0;i<"<<e.getname()<<".length();i++)"<<endline;
+        writer<<tab<<tab<<"writer.writeTextElement(\""<<e.getName()
+              <<"\", "<<e.getname()<<"[i].toString("<<timeFormat<<"));"<<endline;
+        break;
+    case 12: // table
+        writer<<tab<<"writer.writeStartElement(\""<<e.getName()<<"\");"<<endline;
+        writer<<tab<<e.getname()<<".save(writer);"<<endline;
+        writer<<tab<<"writer.writeEndElement();"<<endline;
         break;
     default:
         break;

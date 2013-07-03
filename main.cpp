@@ -1,17 +1,16 @@
 #include <iostream>
 #include <string>
 #include <QString>
+#include <QTextStream>
 #include "funs.h"
+using namespace std;
 
-int main(int argc, char *argv[])
+int main()
 {
-    using namespace std;
     QString filename;
-    if(argc<2)
-        filename = "test.xml";
-    else
-        filename = argv[1];
-    cout<<"File name is "<<argv[1]<<".\n";
+    QTextStream in(stdin);
+    cout<<"Input descriptive xml file: ";
+    in>>filename;
     DataStr dat;
     FileCode err;
     cout<<"Read file...";
@@ -19,7 +18,9 @@ int main(int argc, char *argv[])
         cout<<"Succeed!\n";
     else {
         cout<<"Failed!\n"
+           <<"Error code: "<<err<<"\n"
             <<"The transformation terminates.\n";
+        system("pause");
         return 3;
     }
     cout<<"Creating the corresponding cpp and h files...";
@@ -30,8 +31,10 @@ int main(int argc, char *argv[])
     else {
         cout<<"Failed!\n"
             <<"The transformation terminates.\n";
+        system("pause");
         return 3;
     }
 
+    system("pause");
     return 0;
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DataStruct>
+<Group>
+    <Name>ZtTable</Name>
+    <Element>
+        <Name>Header</Name>
+        <Type>string</Type>
+    </Element>
+    <Element>
+        <Name>Row</Name>
+        <Type>stringlist</Type>
+        <Param>rows</Param>
+    </Element>
+</Group>
+</DataStruct>
