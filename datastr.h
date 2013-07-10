@@ -122,6 +122,7 @@ public:
     }
     bool load(QXmlStreamReader &reader);
     void save(QXmlStreamWriter &writer);
+    bool checkType(QString _t);
 };
 
 #endif // DATASTR_H

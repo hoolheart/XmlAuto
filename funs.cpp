@@ -52,7 +52,10 @@ bool transform(DataStr &dat, const QString &filename, FileCode &err)
     QString name = filename.left(dot_index);
     QString name_h = name+".h";
     QString name_cpp = name+".cpp";
-    name = name.right(name.length()-name.lastIndexOf('\\')-1);
+    int lastSlash = name.lastIndexOf('\\');
+    if (name.lastIndexOf('/')>lastSlash)
+        lastSlash = name.lastIndexOf('/');
+    name = name.right(name.length()-lastSlash-1);
     QFile file_h(name_h), file_cpp(name_cpp);
     if(!file_h.open(QFile::WriteOnly|QFile::Text|QFile::Truncate)) {
         err = FILE_OPENFAIL;
@@ -67,10 +70,13 @@ bool transform(DataStr &dat, const QString &filename, FileCode &err)
     writer_h<<"#ifndef "+name.toUpper()+"_H"<<endline
             <<"#define "+name.toUpper()+"_H"<<endline
             <<"#include <QStringList>"<<endline
-            <<"#include <QDateTime>"<<endline
-            <<"#include \"ZtTable.h\""<<endline
             <<"#include <QXmlStreamReader>"<<endline
-            <<"#include <QXmlStreamWriter>"<<endline<<endline;
+            <<"#include <QXmlStreamWriter>"<<endline;
+    if (dat.checkType("timestamp"))
+        writer_h<<"#include <QDateTime>"<<endline;
+    if (dat.checkType("table"))
+        writer_h<<"#include \"ZtTable.h\""<<endline;
+    writer_h<<endline;
     writer_cpp<<"#include \""<<name<<".h\""<<endline;
 
     for(int i=0;i<dat.groupLength();i++)

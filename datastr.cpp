@@ -175,3 +175,22 @@ void DataStr::save(QXmlStreamWriter &writer)
         groups[i]->save(writer);
     writer.writeEndElement();
 }
+
+bool DataStr::checkType(QString _t) {
+    QStringList typeList = types.split(',');
+    int k;
+    for (k=0;k<typeList.length();k++) {
+        if (typeList[k]==_t)
+            break;
+    }
+    if (k>=typeList.length())
+        return false;
+
+    for (int i=0;i<groups.length();i++) {
+        for (int j=0;j<groups[i]->elementLength();j++) {
+            if (groups[i]->elementAt(j)->gettype()==k)
+                return true;
+        }
+    }
+    return false;
+}
