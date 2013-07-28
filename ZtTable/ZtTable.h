@@ -16,13 +16,13 @@ public:
     QStringList Header() const {return header;}
     void setHeader(const QStringList &_n) {header=_n;}
     int rowsLength() const {return rows.length();}
-    QStringList rowsAt(int i) const {if(i>=0 && i<rows.length()) return rows[i]; else return 0;}
+    QStringList rowsAt(int i) const {if(i>=0 && i<rows.length()) return rows[i]; else return QStringList();}
     bool delRow(int i) {if(i>=0 && i<rows.length()) {rows.removeAt(i);return true;} else return false;}
     bool changeRow(int i, const QStringList &_n) {if(i>=0 && i<rows.length()) {rows[i]=_n;return true;} else return false;}
     void addRow(const QStringList &_n) {rows.append(_n);}
     void cleanAll();
-    bool load(QXmlStreamReader &reader);
-    void save(QXmlStreamWriter &writer);
+    bool loadXml(QXmlStreamReader &reader);
+    void saveXml(QXmlStreamWriter &writer);
 };
 
 #endif

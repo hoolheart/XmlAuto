@@ -18,9 +18,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     datastr.cpp \
-    funs.cpp
+    funs.cpp \
+    ZtTable/ZtTable.cpp
 
 HEADERS += \
     datastr.h \
     publics.h \
-    funs.h
+    funs.h \
+    ZtTable/ZtTable.h
+
+OTHER_FILES += \
+    ZtTable/ZtTable.xml

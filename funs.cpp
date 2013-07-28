@@ -119,8 +119,8 @@ void transformGroup(Group &p, QTextStream &writer_h, QTextStream &writer_cpp)
     }
 
     writer_h<<tab<<"void cleanAll();"<<endline;
-    writer_h<<tab<<"bool load(QXmlStreamReader &reader);"<<endline;
-    writer_h<<tab<<"void save(QXmlStreamWriter &writer);"<<endline;
+    writer_h<<tab<<"bool loadXml(QXmlStreamReader &reader);"<<endline;
+    writer_h<<tab<<"void saveXml(QXmlStreamWriter &writer);"<<endline;
 
     writer_h<<"};"<<endline;
 
@@ -242,7 +242,7 @@ void wrt_h_R(Element &e, QTextStream &writer)
         writer<<tab;
         writer<<"bool "<<e.getname()<<"At(int i) const "
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
-              <<e.getname()<<"[i]; else return 0;}";
+              <<e.getname()<<"[i]; else return false;}";
         break;
     case 10: // timestamp
         writer<<"QDateTime "<<e.getName()<<"() const "
@@ -254,7 +254,7 @@ void wrt_h_R(Element &e, QTextStream &writer)
         writer<<tab;
         writer<<"QDateTime "<<e.getname()<<"At(int i) const "
               <<"{if(i>=0 && i<"<<e.getname()<<".length()) return "
-              <<e.getname()<<"[i]; else return 0;}";
+              <<e.getname()<<"[i]; else return QDateTime();}";
         break;
     case 12: // table
         writer<<"ZtTable* "<<e.getName()<<"() "
@@ -397,7 +397,7 @@ void wrt_cpp(Group &p, QTextStream &writer)
             break;
         case 6: // complex
         case 12: // table
-            writer<<tab<<e->getname()<<".clearAll();"<<endline;
+            writer<<tab<<e->getname()<<".cleanAll();"<<endline;
             break;
         case 7: // complexlist
             writer<<tab;
@@ -416,12 +416,12 @@ void wrt_cpp(Group &p, QTextStream &writer)
     writer<<"}"<<endline;
 
     writer<<endline;
-    writer<<"bool "<<p.getName()<<"::load(QXmlStreamReader &reader)"<<endline;
+    writer<<"bool "<<p.getName()<<"::loadXml(QXmlStreamReader &reader)"<<endline;
     writer<<"{"<<endline;
     QStringList tmp;
     for(int i=0;i<p.elementLength();i++) {
         int t=p.elementAt(i)->gettype();
-        if(t<3||t==6)
+        if(Element::typelist[t].right(4)!="list")
             tmp<<"flag"+QString::number(i);
     }
     for(int i=0;i<tmp.length();i++) {
@@ -459,7 +459,7 @@ void wrt_cpp(Group &p, QTextStream &writer)
     writer<<"}"<<endline;
 
     writer<<endline;
-    writer<<"void "<<p.getName()<<"::save(QXmlStreamWriter &writer)"<<endline;
+    writer<<"void "<<p.getName()<<"::saveXml(QXmlStreamWriter &writer)"<<endline;
     writer<<"{"<<endline;
     writer<<tab<<"writer.writeStartElement(\""<<p.getName()<<"\");"<<endline;
     writer<<endline;
@@ -503,14 +503,14 @@ void wrt_cpp_L(Element &e, int i, QTextStream &writer)
     case 12: // table
         writer<<tab4<<"if("<<flag<<") {"<<flag<<"=false;break;}"<<endline;
         writer<<tab4<<flag<<"=true;"<<endline;
-        writer<<tab4<<"if(!"<<e.getname()<<".load(reader)) {"<<endline;
+        writer<<tab4<<"if(!"<<e.getname()<<".loadXml(reader)) {"<<endline;
         writer<<tab4<<tab<<"cleanAll();"<<endline;
         writer<<tab4<<tab<<"return false;"<<endline;
         writer<<tab4<<"}"<<endline;
         break;
     case 7: // complexlist
         writer<<tab4<<e.getName()<<" *p=new "<<e.getName()<<"();"<<endline;
-        writer<<tab4<<"if(p->load(reader))"<<endline;
+        writer<<tab4<<"if(p->loadXml(reader))"<<endline;
         writer<<tab4<<tab<<e.getname()<<".append(p);"<<endline;
         writer<<tab4<<"else {"<<endline;
         writer<<tab4<<tab<<"delete p;"<<endline;
@@ -568,11 +568,11 @@ void wrt_cpp_S(Element &e, QTextStream &writer)
               <<"\", "<<e.getname()<<"[i]);"<<endline;
         break;
     case 6: // complex
-        writer<<tab<<e.getname()<<".save(writer);"<<endline;
+        writer<<tab<<e.getname()<<".saveXml(writer);"<<endline;
         break;
     case 7: // complexlist
         writer<<tab<<"for(int i=0;i<"<<e.getname()<<".length();i++)"<<endline;
-        writer<<tab<<tab<<e.getname()<<"[i]->save(writer);"<<endline;
+        writer<<tab<<tab<<e.getname()<<"[i]->saveXml(writer);"<<endline;
         break;
     case 8: //boolean
         writer<<tab<<"writer.writeTextElement(\""<<e.getName()
@@ -594,7 +594,7 @@ void wrt_cpp_S(Element &e, QTextStream &writer)
         break;
     case 12: // table
         writer<<tab<<"writer.writeStartElement(\""<<e.getName()<<"\");"<<endline;
-        writer<<tab<<e.getname()<<".save(writer);"<<endline;
+        writer<<tab<<e.getname()<<".saveXml(writer);"<<endline;
         writer<<tab<<"writer.writeEndElement();"<<endline;
         break;
     default:

@@ -12,7 +12,7 @@ void ZtTable::cleanAll()
     rows.clear();
 }
 
-bool ZtTable::load(QXmlStreamReader &reader)
+bool ZtTable::loadXml(QXmlStreamReader &reader)
 {
     bool flag0=false;
     cleanAll();
@@ -41,7 +41,7 @@ bool ZtTable::load(QXmlStreamReader &reader)
     else {cleanAll(); return false;}
 }
 
-void ZtTable::save(QXmlStreamWriter &writer)
+void ZtTable::saveXml(QXmlStreamWriter &writer)
 {
     //writer.writeStartElement("ZtTable");
 

@@ -25,8 +25,8 @@ private:
     QString name;
     QString Name;
     int type;
-    static QStringList typelist;
 public:
+    static QStringList typelist;
     void cleanAll()
     {
         type=0; name=""; Name="";
