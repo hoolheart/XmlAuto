@@ -5,11 +5,12 @@ DataStruct ->
         Element->
             Name;
             Type;
-            Param(optional)
+            Necessary;
+            Mulitple;
 
 'Group' corresponds to the structure of a complex type.
 
 'Element' corresponds to a element within a complex type. Its types include:
-int, double, string, intlist, doublelist, stringlist, complex, complexlist, boolean, booleanlist, timestamp, table
+int, double, string, complex, boolean, timestamp, table
 
 All 'Name's consist of letters, numbers and '_', beginning with upper letter.

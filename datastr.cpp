@@ -1,12 +1,14 @@
 #include "datastr.h"
 
 QString types =
-"int,double,string,intlist,doublelist,stringlist,complex,complexlist,boolean,booleanlist,timestamp,timestamplist,table";
+"int,double,string,complex,boolean,timestamp,table";
 QStringList Element::typelist=types.split(",");
 
 bool Element::load(QXmlStreamReader &reader)
 {
     bool flag1=false,flag2=false;
+    bool flag3=false,flag4=false;
+    necessary = true; multiple = false; complexType.clear();
 
     if(reader.isEndElement())
         return false;
@@ -25,13 +27,25 @@ bool Element::load(QXmlStreamReader &reader)
                 reader.readNext();
             }
             else if(reader.name() == "Type") {
-                if(!flag1)
-                    break;
                 if(flag2) {
                     flag2=false;
                     break;
                 }
                 QString tmp = reader.readElementText().trimmed();
+                if(tmp.startsWith("complex"))
+                {
+                    QStringList tmpList = tmp.split(":");
+                    if(tmpList.size()==2 && tmpList[0]=="complex")
+                    {
+                        type = 3;//complex
+                        complexType = tmpList[1];//complex class type
+                        flag2 = true;
+                        reader.readNext();
+                        continue;
+                    }
+                    else
+                        break;
+                }
                 for(type=0;type<typelist.length();type++) {
                     if (tmp==typelist[type])
                         break;
@@ -42,21 +56,29 @@ bool Element::load(QXmlStreamReader &reader)
                     break;
                 reader.readNext();
             }
-            else if(reader.name() == "Param") {
-                if(!flag1)
+            else if(reader.name() == "Necessary") {
+                if(flag3) {
+                    flag1=false;
                     break;
-                if(!flag2)
-                    break;
+                }
+                flag3 = true;
                 QString tmp = reader.readElementText().trimmed();
-                if(typelist[type].right(4)=="list")
-                    name = tmp;
-                else
+                necessary = (tmp=="true")||(tmp=="True")||(tmp=="T")||(tmp=="1");
+                reader.readNext();
+            }
+            else if(reader.name() == "Multiple") {
+                if(flag4) {
+                    flag1=false;
                     break;
+                }
+                flag4 = true;
+                QString tmp = reader.readElementText().trimmed();
+                multiple = (tmp=="true")||(tmp=="True")||(tmp=="T")||(tmp=="1");
                 reader.readNext();
             }
             else {
-                cleanAll();
-                return false;
+                flag1=false;
+                break;
             }
         }
         else
@@ -76,7 +98,10 @@ void Element::save(QXmlStreamWriter &writer)
     writer.writeStartElement("Element");
 
     writer.writeTextElement("Name",name);
-    writer.writeTextElement("Type",typelist[type]);
+    if(type<typelist.size())
+        writer.writeTextElement("Type",typelist[type]);
+    writer.writeTextElement("Necessary",necessary?"T":"F");
+    writer.writeTextElement("Multiple",multiple?"T":"F");
 
     writer.writeEndElement();
 }
@@ -193,4 +218,17 @@ bool DataStr::checkType(QString _t) {
         }
     }
     return false;
+}
+
+QStringList DataStr::getComplexTypes()
+{
+    QStringList types;
+    for (int i=0;i<groups.length();i++) {
+        for (int j=0;j<groups[i]->elementLength();j++) {
+            Element * pElement = groups[i]->elementAt(j);//get element
+            if(pElement->gettype()==3)//complex
+                types.append(pElement->getComplexType());
+        }
+    }
+    return types;
 }

@@ -24,21 +24,30 @@ class Element {
 private:
     QString name;
     QString Name;
+    QString complexType;
     int type;
+    bool necessary;
+    bool multiple;
 public:
     static QStringList typelist;
     void cleanAll()
     {
         type=0; name=""; Name="";
     }
-    Element() {cleanAll();}
+    Element() {cleanAll();necessary=true;multiple=false;}
     ~Element() {cleanAll();}
     QString getname() const {return name;}
     QString getName() const {return Name;}
     int gettype() const {return type;}
+    QString getComplexType() const {return complexType;}
+    bool isNecesssary() const {return necessary;}
+    bool isMultiple() const {return multiple;}
     void setname(const QString &_name) {name = _name;}
     void setName(const QString &_Name) {Name = _Name;}
     void settype(int _type) {type = _type;}
+    void setComplexType(const QString &_complexType) {complexType = _complexType;}
+    void setNecessary(bool _n) {necessary = _n;}
+    void setMultiple(bool _m) {multiple = _m;}
     bool load(QXmlStreamReader &reader);
     void save(QXmlStreamWriter &writer);
 };
@@ -123,6 +132,7 @@ public:
     bool load(QXmlStreamReader &reader);
     void save(QXmlStreamWriter &writer);
     bool checkType(QString _t);
+    QStringList getComplexTypes();
 };
 
 #endif // DATASTR_H

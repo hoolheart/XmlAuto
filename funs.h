@@ -25,8 +25,9 @@ bool transform(DataStr &dat, const QString &filename, FileCode &err);
  * @param p: the variable storing all necessary informations
  * @param writer_h: the write-stream for header file
  * @param writer_cpp: the write-stream for cpp file
+ * @param mainGroup: whether the group is the main group of the xml file
  */
-void transformGroup(Group &p, QTextStream &writer_h, QTextStream &writer_cpp);
+void transformGroup(Group &p, QTextStream &writer_h, QTextStream &writer_cpp, bool mainGroup=false);
 
 void wrt_h_D(Element &e, QTextStream &writer);
 void wrt_h_R(Element &e, QTextStream &writer);
