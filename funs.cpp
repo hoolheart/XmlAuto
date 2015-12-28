@@ -384,10 +384,11 @@ void wrt_cpp(Group &p, QTextStream &writer)
     writer<<"{"<<endline;
     QStringList tmp;
     for(int i=0;i<p.elementLength();i++) {
-        tmp<<"flag"+QString::number(i);
-        if(i%3==0) writer<<tab;
         //consider necessary
-        writer<<"bool "<<"flag"<<QString::number(i)<<"="<<(p.elementAt(i)->isNecesssary()?"false":"true")<<";";
+        if(p.elementAt(i)->isNecesssary())
+            tmp<<"flag"+QString::number(i);
+        if(i%3==0) writer<<tab;
+        writer<<"bool "<<"flag"<<QString::number(i)<<"=false;";
         if(i==p.elementLength()-1) writer<<endline;//last one
         else if(i%3==2) writer<<endline;//every three flags in one line
         else writer<<" ";
